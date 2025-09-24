@@ -181,7 +181,5 @@ label:after {
 
 a {
   color: inherit;
-  text-decoration: none;
-  border: dotted 1px var(--text);
-  padding: 0.1em 0.2em;
+  text-decoration: underline 1px;
 }
