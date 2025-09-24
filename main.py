@@ -17,11 +17,13 @@ templates = Jinja2Templates(directory="resources/templates")
 
 SUPPORTED_REQUEST_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
+whoisit.bootstrap()
+
 class AddressInfo(BaseModel):
     ip: str
     hostname: str
     port: int
-    whois_url: str = None
+    ip_info_url: str | None = None
     
 class HttpInfo(BaseModel):
     method: str
@@ -56,17 +58,27 @@ async def get_request_info(request: Request) -> RequestInfo:
         server_ip = ipaddress.ip_address(response[4][0])
 
     server_hostname = socket.getfqdn(socket.getnameinfo((str(server_ip), 0), 0)[0])
+    
+    client_ip_info_url = None
+    if client_ip.is_global:
+        client_ip_info_url = (await whoisit.ip_async(client_ip, allow_insecure_ssl=True)).get("url")
+    
+    server_ip_info_url = None
+    if server_ip.is_global:
+        server_ip_info_url = (await whoisit.ip_async(server_ip, allow_insecure_ssl=True)).get("url")
 
     host_info = RequestInfo(
         client_info=AddressInfo(
             ip=request.client.host,
             hostname=socket.getfqdn(socket.getnameinfo((request.client.host, 0), 0)[0]),
-            port=request.client.port
+            port=request.client.port,
+            ip_info_url=client_ip_info_url,
         ),
         server_info=AddressInfo(
             ip=str(server_ip),
             hostname=server_hostname,
             port=request.url.port,
+            ip_info_url=server_ip_info_url,
         ),
         http_info=HttpInfo(
             method=request.method,
