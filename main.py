@@ -77,7 +77,7 @@ async def get_request_info(request: Request) -> RequestInfo:
         server_info=AddressInfo(
             ip=str(server_ip),
             hostname=server_hostname,
-            port=request.url.port,
+            port=request.url.port if request.url.port else 80,
             ip_info_url=server_ip_info_url,
         ),
         http_info=HttpInfo(
