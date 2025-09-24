@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-site_emoji = "📟"
+site_emoji = "🌐"
 site_title = "Net tester"
 version = os.getenv("APP_VERSION", "local-dev")
 app = FastAPI(title=site_title)
