@@ -1,24 +1,40 @@
 :root {
     --bg: white;
     --text: black;
+
+    --grey: #333333;
+    --green: green;
+    --yellow: DarkGoldenRod;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
         --bg: black;
         --text: white;
+
+        --grey: #dddddd;
+        --green: lightgreen;
+        --yellow: yellow;
     }
 }
 
 #color-mode:checked~* {
     --bg: black;
     --text: white;
+
+    --grey: #dddddd;
+    --green: lightgreen;
+    --yellow: yellow;
 }
 
 @media (prefers-color-scheme: dark) {
     #color-mode:checked~* {
         --bg: white;
         --text: black;
+
+        --grey: #333333;
+        --green: green;
+        --yellow: DarkGoldenRod;
     }
 }
 
@@ -43,6 +59,27 @@
         display: initial;
     }
 }
+
+.bold {
+    font-weight: bold;
+}
+
+.green {
+    color: var(--green);
+}
+
+.yellow {
+    color: var(--yellow);
+}
+
+.grey {
+    color: var(--grey);
+}
+
+.italic {
+    font-style: italic;
+}
+
 
 html,
 body {
