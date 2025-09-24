@@ -17,33 +17,36 @@ app = FastAPI(title=site_title)
 app.mount("/static", StaticFiles(directory="resources/static"), name="static")
 templates = Jinja2Templates(directory="resources/templates")
 
+SUPPORTED_REQUEST_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"]
 
-class HostInfo(BaseModel):
-    client_ip: str
-    client_hostname: str
-    client_port: int
-    server_ip: str
-    server_hostname: str
-    server_port: int
-    request_hostname: str
-    request_url: URL
+class AddressInfo(BaseModel):
+    ip: str
+    hostname: str
+    port: int
+    whois_url: str = None
+    
+class HttpInfo(BaseModel):
     method: str
-    http_version: str
+    version: str
+    headers: dict[str, str]
+    body: str
+
+class RequestInfo(BaseModel):
+    client_info: AddressInfo
+    server_info: AddressInfo
+    http_info: HttpInfo
+    request_hostname: str
+    request_url: str
+    request_path: str
+    request_query: str = None
     ip_version: int
     scheme: str
-    headers: dict[str, str]
-
-    def as_dict(self):
-        return asdict(self)
-    
-    def as_json(self):
-        return json.dumps(self.as_dict(), indent=4, sort_keys=True)
 
 
 class FaviconResponse(Response):
     media_type = "image/svg+xml"
 
-def get_host_info(request: Request) -> HostInfo:
+async def get_request_info(request: Request) -> RequestInfo:
     request_hostname = request.url.hostname
     client_ip = ipaddress.ip_address(request.client.host)
     try:
@@ -56,20 +59,29 @@ def get_host_info(request: Request) -> HostInfo:
 
     server_hostname = socket.getfqdn(socket.getnameinfo((str(server_ip), 0), 0)[0])
 
-    host_info = HostInfo(
-        client_ip=request.client.host,
-        client_hostname=socket.getfqdn(socket.getnameinfo((request.client.host, 0), 0)[0]),
-        client_port=request.client.port,
-        server_ip=str(server_ip),
-        server_hostname=server_hostname,
-        server_port=request.url.port,
+    host_info = RequestInfo(
+        client_info=AddressInfo(
+            ip=request.client.host,
+            hostname=socket.getfqdn(socket.getnameinfo((request.client.host, 0), 0)[0]),
+            port=request.client.port
+        ),
+        server_info=AddressInfo(
+            ip=str(server_ip),
+            hostname=server_hostname,
+            port=request.url.port,
+        ),
+        http_info=HttpInfo(
+            method=request.method,
+            version=request.scope.get("http_version"),
+            headers=request.headers,
+            body=await request.body(),
+        ),
         request_hostname=request_hostname,
-        method=request.method,
-        http_version=request.scope.get("http_version"),
         ip_version=client_ip.version,
         scheme=request.url.scheme,
-        headers=request.headers,
-        request_url=request.url,
+        request_url=str(request.url),
+        request_path=request.url.path,
+        request_query=request.url.query
     )
     
     return host_info
@@ -87,7 +99,7 @@ async def get_favicon():
     )
 
 
-@view_router.get("/", response_class=HTMLResponse)
+@view_router.api_route("/", methods=SUPPORTED_REQUEST_METHODS, response_class=HTMLResponse)
 async def get_root_view(request: Request):
     return templates.TemplateResponse(
         request=request,
@@ -95,14 +107,16 @@ async def get_root_view(request: Request):
         context={
             "site_emoji": site_emoji,
             "site_title": site_title,
-            "host_info": get_host_info(request),
+            "request_info": await get_request_info(request),
         },
     )
 
-
-@api_router.get("/")
+@api_router.api_route("/", methods=SUPPORTED_REQUEST_METHODS)
 async def get_api_root(request: Request):
-    return get_host_info(request)
+    if request.method == "HEAD":
+        return
+    
+    return await get_request_info(request)
 
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(view_router)
