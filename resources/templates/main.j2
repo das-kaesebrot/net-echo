@@ -23,11 +23,25 @@
 </head>
 <body>
     {%- block body %}
-    <div>
-        <b>{{ host_info.method }}</b> {{ host_info.request_url.path }} HTTP/{{ host_info.http_version }}
-        {% for header, value in host_info.headers.items() %}
-        <p>{{ header }}: {{ value }}</p>
+    <input id="color-mode" type="checkbox" name="color-mode">
+    <label for="color-mode">
+        <span class="dark-mode-hide">Dark Mode</span>
+        <span class="light-mode-hide">Light Mode</span>
+    </label>
+    <div class="color-scheme-wrapper">
+        <h1 class="no-underline">{{ request_info.http_info.method }} {{ request_info.request_path }}{% if request_info.request_query %}?{{ request_info.request_query }}{% endif %} HTTP/{{ request_info.http_info.version }}</h1>
+        from <a href="{{ request_info.client_info.whois_url }}"><b>{{ request_info.client_info.ip }}</b></a> port <b>{{ request_info.client_info.port }}</b> ({{ request_info.client_info.hostname }})</br>
+        to <a href="{{ request_info.client_info.whois_url }}"><b>{{ request_info.server_info.ip }}</b></a> port <b>{{ request_info.server_info.port }}</b> ({{ request_info.server_info.hostname }})</br>
+        <h1>Headers</h1>
+        {% for header, value in request_info.http_info.headers.items() %}
+        <b>{{ header | e }}</b>: {{ value | e }}<br/>
         {% endfor %}
+        {% if request_info.http_info.body %}
+        <h1>Content</h1>
+        {{ request_info.http_info.body | e }}
+        {% else %}
+        <h1>No content</h1>
+        {% endif %}
     </div>
     {% endblock body -%}
 </body>

@@ -1,7 +1,150 @@
+:root {
+    --bg: white;
+    --text: black;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: black;
+        --text: white;
+    }
+}
+
+#color-mode:checked~* {
+    --bg: black;
+    --text: white;
+}
+
+@media (prefers-color-scheme: dark) {
+    #color-mode:checked~* {
+        --bg: white;
+        --text: black;
+    }
+}
+
+.color-scheme-wrapper {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.light-mode-hide {
+    display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    .dark-mode-hide {
+        display: none;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .light-mode-hide {
+        display: initial;
+    }
+}
+
 html,
 body {
-    font-family: monospace;
-    font-size: 1em;
-    background-color: black;
-    color: white;
+    padding: 0;
+    margin: 0;
+}
+
+h1,
+h2,
+h3 {
+    font-size: 18px;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.no-underline {
+    text-decoration: none;
+}
+
+:root {
+  font-size: 16px;
+  font-family: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  max-width: 35rem;
+}
+
+html,
+body,
+div {
+  max-width: none;
+}
+
+p {
+  line-height: 1.5;
+}
+
+input[type="checkbox"] {
+  opacity: 0.00001;
+  position: absolute;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+div > * + *,
+ul > * + * {
+  margin-top: 1.5rem;
+}
+
+::selection {
+  background: var(--text);
+  color: var(--bg);
+}
+
+label {
+  cursor: pointer;
+  position: absolute;
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.4rem;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  box-shadow: 0 2px var(--bg), 0 4px var(--text);
+  user-select: none;
+}
+
+label:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px var(--bg), 0 3px var(--text);
+}
+
+label:after {
+  content: "✔\FE0E";
+  height: 1.2rem;
+  width: 1.2rem;
+  margin-left: 1rem;
+  border: solid 2px var(--bg);
+  text-align: center;
+  border-radius: 4px;
+  color: transparent;
+}
+
+#color-mode:checked + label:after {
+  color: var(--bg);
+}
+
+.color-scheme-wrapper {
+  padding: 5rem 1rem;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  border: dotted 1px var(--text);
+  padding: 0.1em 0.2em;
 }
