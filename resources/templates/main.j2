@@ -1,0 +1,34 @@
+<html lang="en" data-bs-theme="dark">
+<head>
+    {%- block head -%}
+    <link rel="shortcut icon" href="{{ url_for('get_favicon') }}">
+    <title>{% block title %}{{ site_title }}{% endblock title %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {%- endblock head %}
+
+    {% block opengraph_head -%}
+    <meta property="og:url" content="{% block opengraph_url %}{{ request.url }}{% endblock opengraph_url %}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{%- block opengraph_title %}{%- if is_direct_request -%}{{ image_id }}{% else %}A random image{%- endif -%}{% endblock opengraph_title -%}">
+    <meta property="og:site_name" content="{% block opengraph_site_name %}{{ site_emoji }} {{ site_title }}{%- endblock opengraph_site_name -%}">
+    <meta property="og:image" content="{%- block opengraph_image_url -%}{%- endblock opengraph_image_url -%}">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ self.opengraph_url() }}">
+    <meta name="twitter:title" content="{{ self.opengraph_title() }}">
+    <meta name="twitter:image" content="{{ self.opengraph_image_url() }}">
+    {%- endblock opengraph_head -%}
+    {%- include "custom/head.html" ignore missing -%}
+</head>
+<body>
+    {%- block body %}
+    <div>
+        <b>{{ host_info.method }}</b> {{ host_info.request_url.path }} HTTP/{{ host_info.http_version }}
+        {% for header, value in host_info.headers.items() %}
+        <p>{{ header }}: {{ value }}</p>
+        {% endfor %}
+    </div>
+    {% endblock body -%}
+</body>
+</html>
