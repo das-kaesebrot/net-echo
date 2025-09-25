@@ -47,7 +47,7 @@ class RequestInfo(BaseModel):
     client_info: AddressInfo
     server_info: AddressInfo
     http_info: HttpInfo
-    request_hostname: str
+    request_hostname: str | None
     request_url: str
     request_path: str
     request_query: str = None
