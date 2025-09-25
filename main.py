@@ -1,3 +1,4 @@
+import datetime
 from pydantic import BaseModel
 import ipaddress
 import os
@@ -10,6 +11,14 @@ from fastapi.templating import Jinja2Templates
 
 site_emoji = "🌐"
 site_title = "Net tester"
+
+ENV_PREFIX = "NET_ECHO"
+version = os.getenv("APP_VERSION", "local-dev")
+header_client_port = os.getenv(f"{ENV_PREFIX}_HEADER_CLIENT_PORT", "X-Client-Port")
+header_http_version = os.getenv(f"{ENV_PREFIX}_HEADER_HTTP_VERSION", "X-Http-Version")
+header_transport_protocol = os.getenv(f"{ENV_PREFIX}_HEADER_TRANSPORT_PROTOCOL", "X-Transport-Protocol")
+header_request_time = os.getenv(f"{ENV_PREFIX}_REQUEST_TIME", "X-Request-Time")
+
 version = os.getenv("APP_VERSION", "local-dev")
 app = FastAPI(title=site_title)
 app.mount("/static", StaticFiles(directory="resources/static"), name="static")
@@ -30,6 +39,8 @@ class HttpInfo(BaseModel):
     version: str
     headers: dict[str, str]
     body: str
+    is_https: bool
+    transport_protocol: str
 
 class RequestInfo(BaseModel):
     client_info: AddressInfo
@@ -41,6 +52,7 @@ class RequestInfo(BaseModel):
     request_query: str = None
     ip_version: int
     scheme: str
+    request_time: datetime.datetime
 
 
 class FaviconResponse(Response):
@@ -48,16 +60,33 @@ class FaviconResponse(Response):
 
 async def get_request_info(request: Request) -> RequestInfo:
     request_hostname = request.url.hostname
+    headers = dict(request.headers)
+    
+    is_https = request.url.scheme == "https"
+    
     client_ip = ipaddress.ip_address(request.client.host)
     try:
         server_ip = ipaddress.ip_address(request_hostname)
-        pass
     except ValueError:
         # the request was sent using a DNS name in the url
         response = socket.getaddrinfo(request_hostname, family=(socket.AF_INET if client_ip.version == 4 else socket.AF_INET6), port=0)[0]
         server_ip = ipaddress.ip_address(response[4][0])
 
     server_hostname = socket.getfqdn(socket.getnameinfo((str(server_ip), 0), 0)[0])
+    
+    http_version = headers.get(header_http_version, request.scope.get("http_version"))
+    client_port = headers.get(header_client_port, request.client.port)
+    transport_protocol = headers.get(header_transport_protocol, "tcp").lower() # TODO
+    request_time = headers.get(header_request_time)
+    
+    if not request_time: request_time = datetime.datetime.utcnow()
+    else: request_time = datetime.datetime.fromisoformat(request_time)
+    
+    for header in headers:
+        if header.lower().startswith("x-"):
+            headers.pop(header)
+            
+    state = request.state
     
     client_ip_info_url = None
     if client_ip.is_global:
@@ -71,27 +100,30 @@ async def get_request_info(request: Request) -> RequestInfo:
         client_info=AddressInfo(
             ip=request.client.host,
             hostname=socket.getfqdn(socket.getnameinfo((request.client.host, 0), 0)[0]),
-            port=request.client.port,
+            port=client_port,
             ip_info_url=client_ip_info_url,
         ),
         server_info=AddressInfo(
             ip=str(server_ip),
             hostname=server_hostname,
-            port=request.url.port if request.url.port else 80,
+            port=request.url.port if request.url.port else (443 if is_https else 80),
             ip_info_url=server_ip_info_url,
         ),
         http_info=HttpInfo(
             method=request.method,
-            version=request.scope.get("http_version"),
-            headers=request.headers,
+            version=http_version,
+            headers=headers,
             body=await request.body(),
+            is_https=is_https,
+            transport_protocol=transport_protocol,
         ),
         request_hostname=request_hostname,
         ip_version=client_ip.version,
         scheme=request.url.scheme,
         request_url=str(request.url),
         request_path=request.url.path,
-        request_query=request.url.query
+        request_query=request.url.query,
+        request_time=request_time,
     )
     
     return host_info

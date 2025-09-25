@@ -19,8 +19,9 @@
     </label>
     <div class="color-scheme-wrapper">
         <h1 class="no-underline">{{ request_info.http_info.method }} {{ request_info.request_path }}{% if request_info.request_query %}?{{ request_info.request_query }}{% endif %} HTTP/{{ request_info.http_info.version }}</h1>
-        from <span class="green bold">{% if request_info.client_info.ip_info_url %}<a href="{{ request_info.client_info.ip_info_url }}">{% endif %}{{ request_info.client_info.ip }}</span>{% if request_info.client_info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.client_info.port }}</span> ({{ request_info.client_info.hostname }})</br>
-        to <span class="green bold">{% if request_info.server_info.ip_info_url %}<a href="{{ request_info.server_info.ip_info_url }}">{% endif %}{{ request_info.server_info.ip }}</span>{% if request_info.server_info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.server_info.port }}</span> ({{ request_info.server_info.hostname }})</br>
+        from <span class="green bold">{% if request_info.client_info.ip_info_url %}<a href="{{ request_info.client_info.ip_info_url }}">{% endif %}{{ request_info.client_info.ip }}</span>{% if request_info.client_info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.client_info.port }}</span>/{{ request_info.http_info.transport_protocol }} ({{ request_info.client_info.hostname }})</br>
+        to <span class="green bold">{% if request_info.server_info.ip_info_url %}<a href="{{ request_info.server_info.ip_info_url }}">{% endif %}{{ request_info.server_info.ip }}</span>{% if request_info.server_info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.server_info.port }}</span>/{{ request_info.http_info.transport_protocol }} ({{ request_info.server_info.hostname }})</br>
+        at <span class="bold">{{ request_info.request_time }}</span></br>
         <h1>Headers</h1>
         {% for header, value in request_info.http_info.headers.items() %}
         <span class="bold">{{ header | e }}:</span> <span class="grey">{{ value | e }}</span><br/>
