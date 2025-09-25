@@ -4,6 +4,7 @@ import ipaddress
 import os
 import socket
 import whoisit
+from copy import deepcopy
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -82,11 +83,12 @@ async def get_request_info(request: Request) -> RequestInfo:
     if not request_time: request_time = datetime.datetime.utcnow()
     else: request_time = datetime.datetime.fromisoformat(request_time)
     
+    headers_copy = deepcopy(headers)
     for header in headers:
         if header.lower().startswith("x-"):
-            headers.pop(header)
+            headers_copy.pop(header)
             
-    state = request.state
+    headers = headers_copy
     
     client_ip_info_url = None
     if client_ip.is_global:
