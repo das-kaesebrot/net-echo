@@ -75,10 +75,10 @@ async def get_request_info(request: Request) -> RequestInfo:
 
     server_hostname = socket.getfqdn(socket.getnameinfo((str(server_ip), 0), 0)[0])
     
-    http_version = headers.get(header_http_version, request.scope.get("http_version"))
-    client_port = request.client.port if request.client.port != 0 else headers.get(header_client_port, 0)
-    transport_protocol = headers.get(header_transport_protocol, "tcp").lower() # TODO
-    request_time = headers.get(header_request_time)
+    http_version = headers.get(header_http_version.lower(), request.scope.get("http_version"))
+    client_port = request.client.port if request.client.port != 0 else headers.get(header_client_port.lower(), 0)
+    transport_protocol = headers.get(header_transport_protocol.lower(), "tcp").lower() # TODO
+    request_time = headers.get(header_request_time.lower())
     
     if not request_time: request_time = datetime.datetime.utcnow()
     else: request_time = datetime.datetime.fromisoformat(request_time)
