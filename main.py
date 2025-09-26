@@ -34,6 +34,9 @@ class AddressInfo(BaseModel):
     hostname: str
     port: int
     ip_info_url: str | None = None
+    country: str | None = None
+    registrant: str | None = None
+    entity: str | None = None
     
 class HttpInfo(BaseModel):
     method: str
@@ -90,26 +93,30 @@ async def get_request_info(request: Request) -> RequestInfo:
             
     headers = headers_copy
     
-    client_ip_info_url = None
+    client_ip_info = {}
     if client_ip.is_global:
-        client_ip_info_url = (await whoisit.ip_async(client_ip, allow_insecure_ssl=True)).get("url")
+        client_ip_info = (await whoisit.ip_async(client_ip, allow_insecure_ssl=True))
     
-    server_ip_info_url = None
+    server_ip_info = {}
     if server_ip.is_global:
-        server_ip_info_url = (await whoisit.ip_async(server_ip, allow_insecure_ssl=True)).get("url")
+        server_ip_info = (await whoisit.ip_async(server_ip, allow_insecure_ssl=True))
 
     host_info = RequestInfo(
         client_info=AddressInfo(
             ip=request.client.host,
             hostname=socket.getfqdn(socket.getnameinfo((request.client.host, 0), 0)[0]),
             port=client_port,
-            ip_info_url=client_ip_info_url,
+            ip_info_url=client_ip_info.get("url"),
+            country=client_ip_info.get("country"),
+            registrant=client_ip_info.get("description")[0],
         ),
         server_info=AddressInfo(
             ip=str(server_ip),
             hostname=server_hostname,
             port=request.url.port if request.url.port else (443 if is_https else 80),
-            ip_info_url=server_ip_info_url,
+            ip_info_url=server_ip_info.get("url"),
+            country=server_ip_info.get("country"),
+            entity=server_ip_info.get("description")[0],
         ),
         http_info=HttpInfo(
             method=request.method,
