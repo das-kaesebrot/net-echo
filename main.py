@@ -84,7 +84,8 @@ async def get_request_info(request: Request) -> RequestInfo:
         response = socket.getaddrinfo(request_hostname, family=(socket.AF_INET if client_ip.version == 4 else socket.AF_INET6), port=0)[0]
         server_ip = ipaddress.ip_address(response[4][0])
 
-    server_hostname = socket.getfqdn(socket.getnameinfo((str(server_ip), 0), 0)[0])
+    server_reverse_dns = socket.getfqdn(socket.getnameinfo((str(server_ip), 0), 0)[0])
+    client_reverse_dns = socket.getfqdn(socket.getnameinfo((str(client_ip), 0), 0)[0])
     
     http_version = headers.get(header_http_version.lower(), request.scope.get("http_version"))
     client_port = request.client.port if request.client.port != 0 else headers.get(header_client_port.lower(), 0)
