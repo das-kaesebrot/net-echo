@@ -104,11 +104,11 @@ async def get_request_info(request: Request) -> RequestInfo:
             
     headers = headers_copy
     
-    client_ip_info = {}
+    client_ip_info = None
     if client_ip.is_global:
         client_ip_info = (await whoisit.ip_async(client_ip, allow_insecure_ssl=True))
     
-    server_ip_info = {}
+    server_ip_info = None
     if server_ip.is_global:
         server_ip_info = (await whoisit.ip_async(server_ip, allow_insecure_ssl=True))
 
