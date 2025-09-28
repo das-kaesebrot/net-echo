@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 site_emoji = "🌐"
-site_title = "Net tester"
+site_title = "NET ECHO"
 
 ENV_PREFIX = "NET_ECHO"
 version = os.getenv("APP_VERSION", "local-dev")
