@@ -1,4 +1,5 @@
 import datetime
+from typing import Union
 from pydantic import BaseModel
 import ipaddress
 import os
@@ -9,6 +10,7 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from ipaddress import IPv4Address, IPv6Address
 
 site_emoji = "🌐"
 site_title = "NET ECHO"
