@@ -31,12 +31,14 @@ whoisit.bootstrap()
 
 class AddressInfo(BaseModel):
     ip: str
-    hostname: str
+    reverse_dns: str | None = None
+    reverse_pointer: str
     port: int
     ip_info_url: str | None = None
     country: str | None = None
     registrant: str | None = None
-    entity: str | None = None
+    entity_name: str | None = None
+    description: str | None = None
     
 class HttpInfo(BaseModel):
     method: str
