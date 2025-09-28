@@ -19,21 +19,37 @@
     </label>
     <div class="color-scheme-wrapper">
         <h1 class="no-underline">{{ request_info.http_info.method }} {{ request_info.request_path }}{% if request_info.request_query %}?{{ request_info.request_query }}{% endif %} HTTP/{{ request_info.http_info.version }}</h1>
-        from <span class="green bold">{% if request_info.client_info.ip_info_url %}<a href="{{ request_info.client_info.ip_info_url }}">{% endif %}{{ request_info.client_info.ip }}</span>{% if request_info.client_info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.client_info.port }}</span>/{{ request_info.http_info.transport_protocol }} ({{ request_info.client_info.hostname }})</br>
-        to <span class="green bold">{% if request_info.server_info.ip_info_url %}<a href="{{ request_info.server_info.ip_info_url }}">{% endif %}{{ request_info.server_info.ip }}</span>{% if request_info.server_info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.server_info.port }}</span>/{{ request_info.http_info.transport_protocol }} ({{ request_info.server_info.hostname }})</br>
-        at <span class="bold">{{ request_info.request_time }}</span></br>
-        <h1>Headers</h1>
-        {% for header, value in request_info.http_info.headers.items() %}
-        <span class="bold">{{ header | e }}:</span> <span class="grey">{{ value | e }}</span><br/>
+        {% for verb, info in {"from": request_info.client_info, "to": request_info.server_info}.items() %} {# hacky but it works #}
+            <span class="bold">{{ verb }}</span> <span class="green bold">
+            {%- if info.ip_info_url %}<a href="{{ info.ip_info_url }}" target="_blank">{% endif -%}
+                {{ info.ip }}</span>
+            {%- if info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ info.port }}</span>/{{ request_info.http_info.transport_protocol }}
+            {%- if info.ip_info_url -%}</br>
+                rDNS: <span class="bold">{{ info.reverse_dns }}</span></br>
+                PTR: <span class="bold">{{ info.reverse_pointer }}</span></br>
+                Entity: <span class="bold">{{ info.description }} ({{ info.entity_name }})</span></br>
+                Registrant: <span class="bold">{{ info.registrant }} ({{ info.country }})</span></br>
+            {%- endif -%}
         {% endfor %}
-        <h1>Content</h1>
-        {% if request_info.http_info.body %}
-        {{ request_info.http_info.body | e }}
-        {% else %}
-        <span class="italic">No content</span>
-        {% endif %}
+        at <span class="bold">{{ request_info.request_time }}</span></br>
+        <details>
+            <summary>Headers</summary>
+            <ul>
+            {% for header, value in request_info.http_info.headers.items() %}
+            <li><span class="bold">{{ header | e }}:</span> <span class="grey">{{ value | e }}</span></li>
+            {% endfor %}
+            </ul>
+        </details>
+        <details>
+            <summary>Content</summary>
+            {% if request_info.http_info.body %}
+            {{ request_info.http_info.body | e }}
+            {% else %}
+            <span class="italic">No content</span>
+            {% endif %}
+        </details>
         <footer>    
-            Powered by net-test
+            Powered by <a href="https://github.com/das-kaesebrot/net-echo" target="_blank">net-echo</a>
         </footer>
     </div>
     {% endblock body -%}

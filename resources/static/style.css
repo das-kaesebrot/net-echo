@@ -96,6 +96,36 @@ h3 {
     text-underline-offset: 0.2em;
 }
 
+summary {
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+details {
+  padding: 0.5em 0em 0 0.5em;
+}
+
+details[open] {
+  padding: 0.5em;
+}
+
+details[open] summary {
+  border-bottom: 1px solid #aaaaaa;
+  margin-bottom: 0.5em;
+}
+
+li {
+  list-style-type: none;
+  margin-top: 1em;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+
 .no-underline {
     text-decoration: none;
 }
@@ -131,8 +161,7 @@ body {
   margin: 0;
 }
 
-div > * + *,
-ul > * + * {
+div > * + * {
   margin-top: 1.5rem;
 }
 
