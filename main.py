@@ -63,7 +63,14 @@ class RequestInfo(BaseModel):
 
 class FaviconResponse(Response):
     media_type = "image/svg+xml"
-
+    
+def try_parse_ip_address(ip_addr: str) -> Union[IPv4Address, IPv6Address, None]:
+    try:
+        parsed_ip = ipaddress.ip_address(ip_addr)
+        return parsed_ip
+    except ValueError:
+        return None
+    
 async def get_request_info(request: Request) -> RequestInfo:
     request_hostname = request.url.hostname
     headers = dict(request.headers)
