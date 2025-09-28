@@ -78,9 +78,8 @@ async def get_request_info(request: Request) -> RequestInfo:
     is_https = request.url.scheme == "https"
     
     client_ip = ipaddress.ip_address(request.client.host)
-    try:
-        server_ip = ipaddress.ip_address(request_hostname)
-    except ValueError:
+    server_ip = try_parse_ip_address(request_hostname)
+    if not server_ip:
         # the request was sent using a DNS name in the url
         response = socket.getaddrinfo(request_hostname, family=(socket.AF_INET if client_ip.version == 4 else socket.AF_INET6), port=0)[0]
         server_ip = ipaddress.ip_address(response[4][0])
