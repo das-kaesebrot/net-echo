@@ -13,7 +13,7 @@ from fastapi.templating import Jinja2Templates
 from ipaddress import IPv4Address, IPv6Address
 
 site_emoji = "🌐"
-site_title = "NET ECHO"
+site_title = "net-echo"
 
 ENV_PREFIX = "NET_ECHO"
 version = os.getenv("APP_VERSION", "local-dev")
