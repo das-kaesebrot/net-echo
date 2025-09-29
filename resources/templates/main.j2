@@ -26,7 +26,7 @@
             <ul>
             <li><span class="bold blue">{%- if info.ip_info_url %}<a href="{{ info.ip_info_url }}" target="_blank">{% endif -%}
                 {{ info.ip }}</span>
-            {%- if info.ip_info_url %}</a>{% endif %} (IPv{{ request_info.ip_version }})</li>
+            {%- if info.ip_info_url %}</a>{% endif %} (IPv{{ info.ip_version }})</li>
             {%- if info.ip_info_url -%}
                 <li>rDNS: <span class="bold">{{ info.reverse_dns | default('no record present') }}</span></li>
                 <li>PTR: <span class="bold">{{ info.reverse_pointer }}</span></li>

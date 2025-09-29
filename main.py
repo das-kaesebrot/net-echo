@@ -34,6 +34,7 @@ whoisit.bootstrap()
 
 class AddressInfo(BaseModel):
     ip: str
+    ip_version: int
     reverse_dns: str | None = None
     reverse_pointer: str
     ip_info_url: str | None = None
@@ -58,7 +59,6 @@ class RequestInfo(BaseModel):
     http_info: HttpInfo | None = None
     request_hostname: str | None
     client_port: int
-    ip_version: int
     scheme: str
     request_time: datetime.datetime
 
@@ -107,6 +107,7 @@ async def get_request_info(request: Request, fill_http_info: bool = True) -> Req
     host_info = RequestInfo(
         address_info=AddressInfo(
             ip=str(client_ip),
+            ip_version=client_ip.version,
             reverse_dns=client_reverse_dns,
             reverse_pointer=client_ip.reverse_pointer,
             ip_info_url=client_ip_info.get("url") if client_ip_info else None,
@@ -117,7 +118,6 @@ async def get_request_info(request: Request, fill_http_info: bool = True) -> Req
         ),
         client_port=client_port,
         request_hostname=request_hostname,
-        ip_version=client_ip.version,
         scheme=request.url.scheme,
         request_time=request_time,
     )
