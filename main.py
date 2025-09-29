@@ -72,7 +72,7 @@ def try_parse_ip_address(ip_addr: str) -> Union[IPv4Address, IPv6Address, None]:
     except ValueError:
         return None
     
-async def get_request_info(request: Request) -> RequestInfo:
+async def get_request_info(request: Request, fill_http_info: bool = True) -> RequestInfo:
     request_hostname = request.url.hostname
     headers = dict(request.headers)
     
@@ -157,13 +157,11 @@ async def get_root_view(request: Request):
             "request_info": await get_request_info(request),
         },
     )
-
-@api_router.api_route("/", methods=SUPPORTED_REQUEST_METHODS)
-async def get_api_root(request: Request):
+async def get_api_root(request: Request, http_info: bool = False):
     if request.method == "HEAD":
         return
     
-    return await get_request_info(request)
+    return await get_request_info(request, fill_http_info=http_info)
 
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(view_router)
