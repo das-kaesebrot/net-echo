@@ -88,8 +88,9 @@ async def get_request_info(request: Request, fill_http_info: bool = True) -> Req
     transport_protocol = headers.get(header_transport_protocol.lower(), "tcp").lower() # TODO
     request_time = headers.get(header_request_time.lower())
     
-    if not request_time: request_time = datetime.datetime.utcnow()
-    else: request_time = datetime.datetime.fromisoformat(request_time)
+    tz = ZoneInfo(os.getenv("TZ", "Europe/Berlin"))
+    if not request_time: request_time = datetime.datetime.now(tz)
+    else: request_time = datetime.datetime.fromisoformat(request_time).astimezone(tz)
     
     headers_copy = deepcopy(headers)
     for header in headers:
