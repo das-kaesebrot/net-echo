@@ -80,6 +80,8 @@ async def get_request_info(request: Request, fill_http_info: bool = True) -> Req
     
     client_ip = ipaddress.ip_address(request.client.host)
     client_reverse_dns = socket.getfqdn(socket.getnameinfo((str(client_ip), 0), 0)[0])
+    if client_reverse_dns.strip() == str(client_ip):
+        client_reverse_dns = None # set none if we didn't actually get a reverse dns record back
     
     http_version = headers.get(header_http_version.lower(), request.scope.get("http_version"))
     client_port = request.client.port if request.client.port != 0 else headers.get(header_client_port.lower(), 0)

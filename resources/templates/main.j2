@@ -25,7 +25,7 @@
                 {{ info.ip }}</span>
             {%- if info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.client_port }}</span>/{{ request_info.http_info.transport_protocol }}
             {%- if info.ip_info_url -%}</br>
-                rDNS: <span class="bold">{{ info.reverse_dns }}</span></br>
+                rDNS: <span class="bold">{{ info.reverse_dns | default('no record present') }}</span></br>
                 PTR: <span class="bold">{{ info.reverse_pointer }}</span></br>
                 Entity: <span class="bold">{{ info.description | default('no description') }} ({{ info.entity_name }})</span></br>
                 Registrant: <span class="bold">{{ info.registrant }} ({{ info.country }})</span>
