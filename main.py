@@ -157,6 +157,7 @@ async def get_root_view(request: Request):
             "request_info": await get_request_info(request),
         },
     )
+@api_router.api_route("", methods=SUPPORTED_REQUEST_METHODS)
 async def get_api_root(request: Request, http_info: bool = False):
     if request.method == "HEAD":
         return
