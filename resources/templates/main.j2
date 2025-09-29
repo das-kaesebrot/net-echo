@@ -5,7 +5,7 @@
         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
             <text y='.9em' font-size='90'>{{ site_emoji }}</text>
         </svg>" />
-    <title>{% block title %}Hello, {{ request_info.address_info.ip | e }} - {{ site_title }}{% endblock title %}</title>
+    <title>{% block title %}Hello {{ request_info.address_info.ip | e }} | {{ site_title }}{% endblock title %}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {%- endblock head %}
