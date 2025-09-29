@@ -5,6 +5,7 @@
     --grey: #333333;
     --green: green;
     --yellow: DarkGoldenRod;
+    --blue: DarkBlue;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,6 +16,7 @@
         --grey: #dddddd;
         --green: lightgreen;
         --yellow: yellow;
+        --blue: DeepSkyBlue;
     }
 }
 
@@ -25,6 +27,7 @@
     --grey: #dddddd;
     --green: lightgreen;
     --yellow: yellow;
+    --blue: DeepSkyBlue;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,6 +38,7 @@
         --grey: #333333;
         --green: green;
         --yellow: DarkGoldenRod;
+        --blue: DarkBlue;
     }
 }
 
@@ -71,6 +75,10 @@
 
 .yellow {
     color: var(--yellow);
+}
+
+.blue {
+    color: var(--blue);
 }
 
 .grey {
