@@ -7,7 +7,7 @@ import socket
 import whoisit
 from copy import deepcopy
 from fastapi import APIRouter, FastAPI, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from ipaddress import IPv4Address, IPv6Address
@@ -157,6 +157,12 @@ async def get_root_view(request: Request):
             "request_info": await get_request_info(request),
         },
     )
+    
+
+@view_router.get("/plain", response_class=PlainTextResponse)
+async def get_plain_ip(request: Request):
+    return request.client.host
+
 @api_router.api_route("", methods=SUPPORTED_REQUEST_METHODS)
 async def get_api_root(request: Request, http_info: bool = False):
     if request.method == "HEAD":
