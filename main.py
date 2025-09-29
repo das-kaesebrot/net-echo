@@ -168,7 +168,7 @@ async def get_plain_ip(request: Request):
     return request.client.host
 
 @api_router.api_route("", methods=SUPPORTED_REQUEST_METHODS)
-async def get_api_root(request: Request, http_info: bool = False):
+async def get_api_root(request: Request, http_info: bool = False) -> RequestInfo:
     if request.method == "HEAD":
         return
     
