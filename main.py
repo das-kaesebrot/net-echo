@@ -35,7 +35,6 @@ class AddressInfo(BaseModel):
     ip: str
     reverse_dns: str | None = None
     reverse_pointer: str
-    port: int
     ip_info_url: str | None = None
     country: str | None = None
     registrant: str | None = None
@@ -49,15 +48,15 @@ class HttpInfo(BaseModel):
     body: str
     is_https: bool
     transport_protocol: str
+    url: str
+    path: str
+    query: str = None
 
 class RequestInfo(BaseModel):
-    client_info: AddressInfo
-    server_info: AddressInfo
-    http_info: HttpInfo
+    address_info: AddressInfo
+    http_info: HttpInfo | None = None
     request_hostname: str | None
-    request_url: str
-    request_path: str
-    request_query: str = None
+    client_port: int
     ip_version: int
     scheme: str
     request_time: datetime.datetime
@@ -80,13 +79,6 @@ async def get_request_info(request: Request) -> RequestInfo:
     is_https = request.url.scheme == "https"
     
     client_ip = ipaddress.ip_address(request.client.host)
-    server_ip = try_parse_ip_address(request_hostname)
-    if not server_ip:
-        # the request was sent using a DNS name in the url
-        response = socket.getaddrinfo(request_hostname, family=(socket.AF_INET if client_ip.version == 4 else socket.AF_INET6), port=0)[0]
-        server_ip = ipaddress.ip_address(response[4][0])
-
-    server_reverse_dns = socket.getfqdn(socket.getnameinfo((str(server_ip), 0), 0)[0])
     client_reverse_dns = socket.getfqdn(socket.getnameinfo((str(client_ip), 0), 0)[0])
     
     http_version = headers.get(header_http_version.lower(), request.scope.get("http_version"))
@@ -107,50 +99,37 @@ async def get_request_info(request: Request) -> RequestInfo:
     client_ip_info = None
     if client_ip.is_global:
         client_ip_info = (await whoisit.ip_async(client_ip, allow_insecure_ssl=True))
-    
-    server_ip_info = None
-    if server_ip.is_global:
-        server_ip_info = (await whoisit.ip_async(server_ip, allow_insecure_ssl=True))
 
     host_info = RequestInfo(
-        client_info=AddressInfo(
+        address_info=AddressInfo(
             ip=str(client_ip),
             reverse_dns=client_reverse_dns,
             reverse_pointer=client_ip.reverse_pointer,
-            port=client_port,
             ip_info_url=client_ip_info.get("url") if client_ip_info else None,
             country=client_ip_info.get("country") if client_ip_info else None,
             entity_name=client_ip_info.get("name") if client_ip_info else None,
-            registrant=client_ip_info.get("entities").get("registrant")[0].get("name") if server_ip_info else None,
+            registrant=client_ip_info.get("entities").get("registrant")[0].get("name") if client_ip_info else None,
             description=" ".join(client_ip_info.get("description", [])) if client_ip_info else None,
         ),
-        server_info=AddressInfo(
-            ip=str(server_ip),
-            reverse_dns=server_reverse_dns,
-            reverse_pointer=server_ip.reverse_pointer,
-            port=request.url.port if request.url.port else (443 if is_https else 80),
-            ip_info_url=server_ip_info.get("url") if server_ip_info else None,
-            country=server_ip_info.get("country") if server_ip_info else None,
-            entity_name=server_ip_info.get("name") if server_ip_info else None,
-            registrant=server_ip_info.get("entities").get("registrant")[0].get("name") if server_ip_info else None,
-            description=" ".join(server_ip_info.get("description", [])) if server_ip_info else None,
-        ),
-        http_info=HttpInfo(
+        client_port=client_port,
+        request_hostname=request_hostname,
+        ip_version=client_ip.version,
+        scheme=request.url.scheme,
+        request_time=request_time,
+    )
+    
+    if fill_http_info:
+        host_info.http_info = HttpInfo(
             method=request.method,
             version=http_version,
             headers=headers,
             body=await request.body(),
             is_https=is_https,
             transport_protocol=transport_protocol,
-        ),
-        request_hostname=request_hostname,
-        ip_version=client_ip.version,
-        scheme=request.url.scheme,
-        request_url=str(request.url),
-        request_path=request.url.path,
-        request_query=request.url.query,
-        request_time=request_time,
-    )
+            url=str(request.url),
+            path=request.url.path,
+            query=request.url.query,
+        )
     
     return host_info
 

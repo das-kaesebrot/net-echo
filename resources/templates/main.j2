@@ -18,19 +18,19 @@
         <span class="light-mode-hide">Light Mode</span>
     </label>
     <div class="color-scheme-wrapper">
-        <h1 class="no-underline">{{ request_info.http_info.method }} {{ request_info.request_path }}{% if request_info.request_query %}?{{ request_info.request_query }}{% endif %} HTTP/{{ request_info.http_info.version }}</h1>
-        {% for verb, info in {"from": request_info.client_info, "to": request_info.server_info}.items() %} {# hacky but it works #}
-            <span class="bold">{{ verb }}</span> <span class="green bold">
+        <h1 class="no-underline">{{ request_info.http_info.method }} {{ request_info.http_info.path }}{{ "?" + request_info.http_info.query if request_info.http_info.query else '' }} HTTP/{{ request_info.http_info.version }}</h1>
+            <span class="bold">from</span> <span class="green bold">
+            {% set info = request_info.address_info %}
             {%- if info.ip_info_url %}<a href="{{ info.ip_info_url }}" target="_blank">{% endif -%}
                 {{ info.ip }}</span>
-            {%- if info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ info.port }}</span>/{{ request_info.http_info.transport_protocol }}
+            {%- if info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.client_port }}</span>/{{ request_info.http_info.transport_protocol }}
             {%- if info.ip_info_url -%}</br>
                 rDNS: <span class="bold">{{ info.reverse_dns }}</span></br>
                 PTR: <span class="bold">{{ info.reverse_pointer }}</span></br>
-                Entity: <span class="bold">{{ info.description }} ({{ info.entity_name }})</span></br>
-                Registrant: <span class="bold">{{ info.registrant }} ({{ info.country }})</span></br>
+                Entity: <span class="bold">{{ info.description | default('no description') }} ({{ info.entity_name }})</span></br>
+                Registrant: <span class="bold">{{ info.registrant }} ({{ info.country }})</span>
             {%- endif -%}
-        {% endfor %}
+        </br>
         at <span class="bold">{{ request_info.request_time }}</span></br>
         <details>
             <summary>Headers</summary>
