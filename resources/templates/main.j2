@@ -18,37 +18,44 @@
         <span class="light-mode-hide">Light Mode</span>
     </label>
     <div class="color-scheme-wrapper">
-        <h1 class="no-underline">{{ request_info.http_info.method }} {{ request_info.http_info.path }}{{ "?" + request_info.http_info.query if request_info.http_info.query else '' }} HTTP/{{ request_info.http_info.version }}</h1>
-            <span class="bold">from</span> <span class="green bold">
-            {% set info = request_info.address_info %}
-            {%- if info.ip_info_url %}<a href="{{ info.ip_info_url }}" target="_blank">{% endif -%}
-                {{ info.ip }}</span>
-            {%- if info.ip_info_url %}</a>{% endif %} port <span class="yellow bold">{{ request_info.client_port }}</span>/{{ request_info.http_info.transport_protocol }}
-            {%- if info.ip_info_url -%}</br>
-                rDNS: <span class="bold">{{ info.reverse_dns | default('no record present') }}</span></br>
-                PTR: <span class="bold">{{ info.reverse_pointer }}</span></br>
-                Entity: <span class="bold">{{ info.description | default('no description') }} ({{ info.entity_name }})</span></br>
-                Registrant: <span class="bold">{{ info.registrant }} ({{ info.country }})</span>
-            {%- endif -%}
-        </br>
-        at <span class="bold">{{ request_info.request_time }}</span></br>
-        <details>
-            <summary>Headers</summary>
+        {% set info = request_info.address_info %}
+        Hello <span class="bold blue">{{ info.ip }}</span> port <span class="yellow bold">{{ request_info.client_port }}</span> proto <span class="bold">{{ request_info.http_info.transport_protocol }}</span></br>
+        at <span class="bold">{{ request_info.request_time.strftime('%A, %B %-d %Y %X (%Z)') }}</span></span></br>
+        <details open>
+            <summary>IP info</summary>
             <ul>
-            {% for header, value in request_info.http_info.headers.items() %}
-            <li><span class="bold">{{ header | e }}:</span> <span class="grey">{{ value | e }}</span></li>
-            {% endfor %}
+            <li><span class="bold blue">{%- if info.ip_info_url %}<a href="{{ info.ip_info_url }}" target="_blank">{% endif -%}
+                {{ info.ip }}</span>
+            {%- if info.ip_info_url %}</a>{% endif %} (IPv{{ request_info.ip_version }})</li>
+            {%- if info.ip_info_url -%}
+                <li>rDNS: <span class="bold">{{ info.reverse_dns | default('no record present') }}</span></li>
+                <li>PTR: <span class="bold">{{ info.reverse_pointer }}</span></li>
+                <li>Entity: <span class="bold">{{ info.description | default('no description') }} ({{ info.entity_name }})</span></li>
+                <li>Registrant: <span class="bold">{{ info.registrant }} ({{ info.country }})</span></li>
+            {%- endif -%}
             </ul>
         </details>
         <details>
-            <summary>Content</summary>
-            {% if request_info.http_info.body %}
-            {{ request_info.http_info.body | e }}
-            {% else %}
-            <span class="italic">No content</span>
-            {% endif %}
+            <summary>HTTP info</summary>
+            <h1 class="no-underline">{{ request_info.http_info.method }} {{ request_info.http_info.path }}{{ "?" + request_info.http_info.query if request_info.http_info.query else '' }} HTTP/{{ request_info.http_info.version }}</h1>
+            <details open>
+                <summary>Headers</summary>
+                <ul>
+                {% for header, value in request_info.http_info.headers.items() %}
+                <li><span class="bold">{{ header | e }}:</span> <span class="grey">{{ value | e }}</span></li>
+                {% endfor %}
+                </ul>
+            </details>
+            <details>
+                <summary>Content</summary>
+                {% if request_info.http_info.body %}
+                {{ request_info.http_info.body | e }}
+                {% else %}
+                <span class="italic">No content</span>
+                {% endif %}
+            </details>
         </details>
-        <footer>    
+        <footer>
             Powered by <a href="https://github.com/das-kaesebrot/net-echo" target="_blank">net-echo</a> | API docs: <a href="docs">Swagger UI</a>/<a href="redoc">ReDoc</a>/<a href="openapi.json">openapi.json</a>
         </footer>
     </div>
