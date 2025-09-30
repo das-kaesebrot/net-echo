@@ -213,5 +213,9 @@ async def get_api_root(request: Request, http_info: bool = False) -> RequestInfo
     
     return await get_request_info(request, fill_http_info=http_info)
 
+@api_router.get("/fact")
+async def get_fun_fact(request: Request) -> PlainTextResponse:
+    return ip_fun_fact(ipaddress.ip_address(request.client.host))
+
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(view_router)
