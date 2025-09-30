@@ -30,8 +30,10 @@
             {%- if info.ip_info_url -%}
                 <li>rDNS: <span class="bold">{{ info.reverse_dns | default('no record present') }}</span></li>
                 <li>PTR: <span class="bold">{{ info.reverse_pointer }}</span></li>
-                <li>Entity: <span class="bold">{{ info.description | default('no description') }} ({{ info.entity_name }})</span></li>
+                <li>Entity: <span class="bold">{{ info.entity_name }}</span></li>
                 <li>Registrant: <span class="bold">{{ info.registrant }} ({{ info.country }})</span></li>
+                <li>Description: <span class="bold">{% if info.description and info.description|length >= 0  %}{{ info.description|join(' ') }}{% else %}No description{% endif %}</span></li>
+                <li>Fun fact: <span class="bold">{{ info.fun_fact }}</span></li>
             {%- endif -%}
             </ul>
         </details>

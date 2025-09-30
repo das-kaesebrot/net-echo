@@ -1,4 +1,5 @@
 import datetime
+import random
 from typing import Union
 from zoneinfo import ZoneInfo
 from pydantic import BaseModel
@@ -6,6 +7,7 @@ import ipaddress
 import os
 import socket
 import whoisit
+import math
 from copy import deepcopy
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, Response
@@ -41,7 +43,8 @@ class AddressInfo(BaseModel):
     country: str | None = None
     registrant: str | None = None
     entity_name: str | None = None
-    description: str | None = None
+    description: list[str] | None = None
+    fun_fact: str | None = None
     
 class HttpInfo(BaseModel):
     method: str
@@ -62,6 +65,41 @@ class RequestInfo(BaseModel):
     scheme: str
     request_time: datetime.datetime
 
+def ip_fun_fact(ip: IPv4Address | IPv6Address) -> str:
+    IPV4_MAX = (2 ** 32) - 1
+    IPV6_MAX = (2 ** 128) - 1
+
+    multiply_ip = lambda x, y: str(ipaddress.ip_address((math.floor(int(x) * y)) % (IPV4_MAX if x.version == 4 else IPV6_MAX)))
+    
+    fact_func_or_str_list = [
+        lambda a: f"The square root of your IP address is {math.sqrt(int(a))}.",
+        lambda a: f"Your IP address contains {bin(int(a)).count('1')} bits that are set to 1.",
+        lambda a: f"Your IP address contains {bin(int(a)).count('0')} bits that are set to 0.",
+        lambda a: f"Your IP address has been known to associate with at least { int(a) % 41 } russian cyber criminals.",
+        lambda a: f"Your IP address modulo some (unknown!) prime is {int(a) % 31}.",
+        lambda a: f"You may also like {multiply_ip(a, math.pi)}.",
+        lambda a: f"You may also like {multiply_ip(a, math.e)}.",
+        lambda a: f"NaN",
+        lambda a: f"I can't deal with this. Please delimit your IP address with semicolons, not {'dots' if a.version == 4 else 'colons'}.",
+        lambda a: f"Would you also like to buy this IP address: {multiply_ip(a, 0.42)}? Please ring us at 555-162-321.",
+        lambda a: f"Google knows your IP.",
+        # 53 addresses per page at 12 pt
+        # 5 g per A4 page
+        lambda a: f"Printing all IP addresses (one per line) preceding yours on 80 g/m^2 A4 paper with a font size of 12 pt would weigh {int(a) * 53 * 5:e} g.",
+        lambda a: f"Printing all IP addresses (one per line) preceding yours on A4 paper with a font size of 12 pt would generate {math.ceil(int(a) / 53):e} pages.",
+        lambda a: f"I am in a computer.",
+        lambda a: f"I am at the 32 bit integer limit.",
+        lambda a: f"Your IP's integer representation is {int(a)}.",
+        lambda a: f"Dude, Where's My DNS server?",
+        lambda a: f"Get off my LAN!",
+    ]
+    
+    func_fact = random.choice(fact_func_or_str_list)
+    
+    if isinstance(func_fact, str):
+        return func_fact
+    
+    return func_fact(ip)
 
 class FaviconResponse(Response):
     media_type = "image/svg+xml"
@@ -114,7 +152,8 @@ async def get_request_info(request: Request, fill_http_info: bool = True) -> Req
             country=client_ip_info.get("country") if client_ip_info else None,
             entity_name=client_ip_info.get("name") if client_ip_info else None,
             registrant=client_ip_info.get("entities").get("registrant")[0].get("name") if client_ip_info else None,
-            description=" ".join(client_ip_info.get("description", [])) if client_ip_info else None,
+            description=client_ip_info.get("description") if client_ip_info else None,
+            fun_fact=ip_fun_fact(client_ip),
         ),
         client_port=client_port,
         request_hostname=request_hostname,
